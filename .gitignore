@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 node_modules/
 dist/
 .env
@@ -9,7 +8,6 @@ dist/
 
 *.tsbuildinfo
 .sites-runtime/
-=======
 # Logs
 logs
 *.log
@@ -159,4 +157,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
->>>>>>> 4945c7a4729f3d63e9c3ff478ffe6dc562c82edf
+
+# Local notes and hosting metadata
+/.openai/
+/README.md
