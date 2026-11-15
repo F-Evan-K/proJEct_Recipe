@@ -22,7 +22,8 @@ const pageComponents: Record<Page, ComponentType> = {
   "Waste Analytics": WasteAnalyticsPage,
 };
 function Workspace() {
-  const { page } = useWorkspace();
+  const { page, apiMode, apiReady, apiError, refreshWorkspace } =
+    useWorkspace();
   const ActivePage = pageComponents[page];
   return (
     <div className="app">
@@ -31,7 +32,27 @@ function Workspace() {
         <Header />
         <div className="content">
           <PageHeading />
-          <ActivePage />
+          {apiMode && (
+            <div className="notice">
+              <div>
+                <b>MySQL lokal · {apiReady ? "terhubung" : "memuat data"}</b>
+                <p>
+                  Menu, inventory, waste dan rencana memakai API. Grafik dan
+                  forecasting tetap ilustrasi, belum memakai model AI.
+                </p>
+                {apiError && <p role="alert">Gagal memuat: {apiError}</p>}
+              </div>
+              {apiError && (
+                <button
+                  className="button white"
+                  onClick={() => void refreshWorkspace().catch(() => {})}
+                >
+                  Coba lagi
+                </button>
+              )}
+            </div>
+          )}
+          {(!apiMode || apiReady) && <ActivePage />}
           <Footer />
         </div>
       </main>

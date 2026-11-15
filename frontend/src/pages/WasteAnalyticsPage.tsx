@@ -2,7 +2,7 @@ import { ChartNoAxesCombined, ClipboardList, Leaf } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { Metric } from "../components/Metric";
 export function WasteAnalyticsPage() {
-  const { wastes } = useWorkspace();
+  const { wastes, apiMode } = useWorkspace();
   return (
     <>
       <div className="notice">
@@ -18,7 +18,10 @@ export function WasteAnalyticsPage() {
       <div className="metrics three">
         <Metric
           title="Waste tercatat"
-          value={wastes.reduce((a, b) => a + b.qty, 0).toFixed(1)}
+          value={wastes
+            .filter((w) => (w.unit ?? "kg") === "kg")
+            .reduce((a, b) => a + b.qty, 0)
+            .toFixed(1)}
           unit="kg"
           note="Total dari catatan demo"
           icon={<Leaf size={18} />}
@@ -27,7 +30,11 @@ export function WasteAnalyticsPage() {
           title="Catatan waste"
           value={String(wastes.length)}
           unit="catatan"
-          note="Minggu ini · workspace demo"
+          note={
+            apiMode
+              ? "Semua catatan · MySQL lokal"
+              : "Minggu ini · workspace demo"
+          }
           icon={<ClipboardList size={18} />}
         />
         <Metric
@@ -62,9 +69,11 @@ export function WasteAnalyticsPage() {
                   <td>
                     <b>{w.name}</b>
                   </td>
-                  <td>{w.qty} kg</td>
+                  <td>
+                    {w.qty} {w.unit ?? "kg"}
+                  </td>
                   <td>{w.reason}</td>
-                  <td>Minggu ini</td>
+                  <td>{apiMode ? "Semua periode" : "Minggu ini"}</td>
                 </tr>
               ))}
             </tbody>

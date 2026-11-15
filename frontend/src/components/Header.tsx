@@ -1,7 +1,7 @@
 import { Bell, Menu } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function Header() {
-  const { page, mobile, setMobile, notify } = useWorkspace();
+  const { page, mobile, setMobile, notify, apiMode } = useWorkspace();
   return (
     <header className="topbar">
       <div className="breadcrumb">
@@ -18,7 +18,7 @@ export function Header() {
       <div className="top-actions">
         <span className="demo">
           <i />
-          Demo workspace
+          {apiMode ? "Local workspace" : "Demo workspace"}
         </span>
         <button
           className="icon-btn"
