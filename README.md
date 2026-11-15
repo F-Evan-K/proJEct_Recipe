@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # KitchenFlow AI — Frontend
 
 React + TypeScript + Vite. Dibuat untuk Culina Labs di folder proJEct_Recipe.
@@ -22,3 +23,7 @@ React + TypeScript + Vite. Dibuat untuk Culina Labs di folder proJEct_Recipe.
 Semua angka ilustratif. Belum terhubung NestJS, database, atau model ML. Perubahan hanya di memori dan reset ketika refresh. Tidak ada login atau penyimpanan produksi. Resep contoh hanya memodelkan ayam dan beras; tidak lengkap untuk operasional nyata.
 
 Rencana pengembangan berikut: kontrak API NestJS, dataset, resep lengkap, ledger stok, dan forecasting FastAPI.
+=======
+# proJEct_Recipe
+An AI-powered kitchen management platform that helps F&amp;B businesses forecast demand, optimize inventory, streamline food preparation, and reduce food waste.
+>>>>>>> 4945c7a4729f3d63e9c3ff478ffe6dc562c82edf
