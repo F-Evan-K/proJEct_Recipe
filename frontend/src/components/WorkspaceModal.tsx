@@ -13,6 +13,9 @@ export function WorkspaceModal() {
     wastes,
     setWastes,
     notify,
+    apiMode,
+    pending,
+    submitApiData,
   } = useWorkspace();
   return (
     modal && (
@@ -37,14 +40,36 @@ export function WorkspaceModal() {
               <span className="eyebrow">RESEP CONTOH · PER PORSI</span>
               <h2>{selected.name}</h2>
               <p>Preview bahan untuk kalkulasi planner.</p>
-              <div className="recipe-line">
-                <span>Daging ayam</span>
-                <b>{(selected.chicken * 1000).toFixed(0)} g</b>
-              </div>
-              <div className="recipe-line">
-                <span>Beras</span>
-                <b>{(selected.rice * 1000).toFixed(0)} g</b>
-              </div>
+              {apiMode ? (
+                <>
+                  {selected.recipe?.length ? (
+                    selected.recipe.map((line) => (
+                      <div className="recipe-line" key={line.ingredientId}>
+                        <span>{line.name}</span>
+                        <b>
+                          {line.quantity} {line.unit}
+                        </b>
+                      </div>
+                    ))
+                  ) : (
+                    <p>
+                      Resep belum diisi. Lengkapi melalui API sebelum produksi.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  {" "}
+                  <div className="recipe-line">
+                    <span>Daging ayam</span>
+                    <b>{(selected.chicken * 1000).toFixed(0)} g</b>
+                  </div>
+                  <div className="recipe-line">
+                    <span>Beras</span>
+                    <b>{(selected.rice * 1000).toFixed(0)} g</b>
+                  </div>
+                </>
+              )}
               <div className="notice compact">
                 Resep belum lengkap. Bumbu dan bahan lain belum dimodelkan.
               </div>
@@ -68,11 +93,19 @@ export function WorkspaceModal() {
                     ? "Tambah menu baru"
                     : "Catat bahan terbuang"}
               </h2>
-              <p>Perubahan hanya tersimpan selama sesi ini.</p>
+              <p>
+                {apiMode
+                  ? "Data disimpan ke MySQL lokal. Waste akan mengurangi stok bahan."
+                  : "Perubahan hanya tersimpan selama sesi ini."}
+              </p>
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   const d = new FormData(e.currentTarget);
+                  if (apiMode) {
+                    if (await submitApiData(modal, d)) setModal(null);
+                    return;
+                  }
                   if (modal === "stock") {
                     const name = String(d.get("name"));
                     setStock(
@@ -119,7 +152,7 @@ export function WorkspaceModal() {
                   {modal === "stock"
                     ? "Bahan"
                     : "Nama " + (modal === "menu" ? "menu" : "bahan")}
-                  {modal === "stock" ? (
+                  {modal === "stock" || (apiMode && modal === "waste") ? (
                     <select name="name">
                       {stock.map((s) => (
                         <option key={s.name}>{s.name}</option>
@@ -162,9 +195,17 @@ export function WorkspaceModal() {
                     </select>
                   </label>
                 )}
-                <button className="button primary full" type="submit">
+                <button
+                  className="button primary full"
+                  type="submit"
+                  disabled={pending}
+                >
                   <Check size={16} />
-                  Simpan data demo
+                  {pending
+                    ? "Menyimpan..."
+                    : apiMode
+                      ? "Simpan data"
+                      : "Simpan data demo"}
                 </button>
               </form>
             </>

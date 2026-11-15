@@ -1,0 +1,34 @@
+@base = http://127.0.0.1:3000/api/v1
+
+### Database readiness
+GET {{base}}/health/ready
+
+### Menus and recipes (use IDs returned here)
+GET {{base}}/menus
+
+### Ingredient quantities use each ingredient's stored unit
+GET {{base}}/inventory
+
+### Replace recipe per portion; IDs below refer to fresh demo seed only
+PUT {{base}}/menus/1/recipe
+Content-Type: application/json
+
+{"lines":[{"ingredientId":1,"quantity":0.15},{"ingredientId":2,"quantity":0.1}]}
+
+### Stock receipt: use a new idempotencyKey for each distinct receipt
+POST {{base}}/stock-movements
+Content-Type: application/json
+
+{"ingredientId":1,"quantity":1,"reason":"Local example receipt","idempotencyKey":"example-receipt-001"}
+
+### Read-only planner preview
+POST {{base}}/kitchen-plans/preview
+Content-Type: application/json
+
+{"items":[{"menuId":1,"portions":20}]}
+
+### Daily sales replaces the aggregate for that menu/date
+POST {{base}}/sales
+Content-Type: application/json
+
+{"menuId":1,"businessDate":"2026-11-15","quantity":20,"stockout":false,"closed":false}

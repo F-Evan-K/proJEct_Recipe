@@ -16,8 +16,15 @@ export type Food = {
   chicken: number;
   rice: number;
   emoji: string;
+  recipe?: {
+    ingredientId: number;
+    name: string;
+    unit: string;
+    quantity: number;
+  }[];
 };
 export type StockItem = {
+  id?: number;
   name: string;
   category: string;
   qty: number;
@@ -25,6 +32,7 @@ export type StockItem = {
   min: number;
 };
 export type WasteRecord = {
+  unit?: string;
   name: string;
   qty: number;
   reason: string;

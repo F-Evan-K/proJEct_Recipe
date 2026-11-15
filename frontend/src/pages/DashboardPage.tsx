@@ -96,7 +96,10 @@ export function DashboardPage() {
         />
         <Metric
           title="Waste tercatat"
-          value={wastes.reduce((a, b) => a + b.qty, 0).toFixed(1)}
+          value={wastes
+            .filter((w) => (w.unit ?? "kg") === "kg")
+            .reduce((a, b) => a + b.qty, 0)
+            .toFixed(1)}
           unit="kg"
           icon={<Leaf size={18} />}
           note="Pencatatan ilustratif minggu ini"

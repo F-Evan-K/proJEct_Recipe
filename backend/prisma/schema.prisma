@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Ingredient {
+  id           Int             @id @default(autoincrement())
+  name         String          @unique @db.VarChar(100)
+  category     String          @db.VarChar(60)
+  unit         String          @db.VarChar(10)
+  quantity     Decimal         @default(0) @db.Decimal(14, 6)
+  minimum      Decimal         @default(0) @db.Decimal(14, 6)
+  recipeLines  RecipeLine[]
+  movements    StockMovement[]
+  wasteRecords WasteRecord[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model MenuItem {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique @db.VarChar(100)
+  category  String       @db.VarChar(60)
+  price     Decimal      @db.Decimal(12, 2)
+  emoji     String       @default("🍽️") @db.VarChar(16)
+  active    Boolean      @default(true)
+  recipe    RecipeLine[]
+  sales     DailySale[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model RecipeLine {
+  id           Int        @id @default(autoincrement())
+  menuId       Int
+  ingredientId Int
+  quantity     Decimal    @db.Decimal(14, 6)
+  menu         MenuItem   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+
+  @@unique([menuId, ingredientId])
+}
+
+model StockMovement {
+  id             Int        @id @default(autoincrement())
+  ingredientId   Int
+  quantity       Decimal    @db.Decimal(14, 6)
+  reason         String     @db.VarChar(255)
+  idempotencyKey String     @unique @db.VarChar(120)
+  ingredient     Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  createdAt      DateTime   @default(now())
+
+  @@index([ingredientId, createdAt])
+}
+
+model WasteRecord {
+  id             Int        @id @default(autoincrement())
+  ingredientId   Int
+  quantity       Decimal    @db.Decimal(14, 6)
+  reason         String     @db.VarChar(255)
+  idempotencyKey String     @unique @db.VarChar(120)
+  ingredient     Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  createdAt      DateTime   @default(now())
+}
+
+model DailySale {
+  id           Int      @id @default(autoincrement())
+  menuId       Int
+  businessDate DateTime @db.Date
+  quantity     Int
+  stockout     Boolean  @default(false)
+  closed       Boolean  @default(false)
+  menu         MenuItem @relation(fields: [menuId], references: [id], onDelete: Restrict)
+
+  @@unique([menuId, businessDate])
+}
+
+model KitchenPlan {
+  id             Int       @id @default(autoincrement())
+  businessDate   DateTime  @db.Date
+  status         String    @default("DRAFT") @db.VarChar(16)
+  snapshot       Json
+  idempotencyKey String    @unique @db.VarChar(120)
+  requestHash    String    @db.VarChar(64)
+  approvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+}

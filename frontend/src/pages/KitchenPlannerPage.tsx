@@ -11,6 +11,10 @@ export function KitchenPlannerPage() {
     rice,
     stock,
     notify,
+    requirements,
+    apiMode,
+    pending,
+    approvePlan,
   } = useWorkspace();
   return (
     <>
@@ -21,7 +25,13 @@ export function KitchenPlannerPage() {
           <p>Atur porsi, cek kebutuhan, lalu setujui rencana.</p>
         </div>
         <span className={"badge " + (approved ? "green" : "amber")}>
-          {approved ? "Disetujui · Demo" : "Draft · Demo"}
+          {approved
+            ? apiMode
+              ? "Disetujui · Lokal"
+              : "Disetujui · Demo"
+            : apiMode
+              ? "Draft · Lokal"
+              : "Draft · Demo"}
         </span>
       </div>
       <div className="planner-grid">
@@ -55,7 +65,7 @@ export function KitchenPlannerPage() {
                     <td>
                       <div className="stepper">
                         <button
-                          disabled={approved || f.portions === 0}
+                          disabled={pending || approved || f.portions === 0}
                           aria-label={"Kurangi " + f.name}
                           onClick={() =>
                             setFoods(
@@ -77,7 +87,7 @@ export function KitchenPlannerPage() {
                           type="number"
                           min="0"
                           max="9999"
-                          disabled={approved}
+                          disabled={pending || approved}
                           value={f.portions}
                           onChange={(e) =>
                             setFoods(
@@ -99,13 +109,16 @@ export function KitchenPlannerPage() {
                           }
                         />
                         <button
-                          disabled={approved}
+                          disabled={pending || approved}
                           aria-label={"Tambah " + f.name}
                           onClick={() =>
                             setFoods(
                               foods.map((x) =>
                                 x.id === f.id
-                                  ? { ...x, portions: x.portions + 1 }
+                                  ? {
+                                      ...x,
+                                      portions: Math.min(9999, x.portions + 1),
+                                    }
                                   : x,
                               ),
                             )
@@ -121,56 +134,57 @@ export function KitchenPlannerPage() {
             </table>
           </div>
           <div className="table-footer">
-            <CircleHelp size={15} /> Persetujuan demo tidak mengurangi stok.
+            <CircleHelp size={15} /> Persetujuan rencana tidak mengurangi atau
+            mereservasi stok.
           </div>
         </section>
         <section className="card requirements">
           <h3>Kebutuhan bahan</h3>
-          <p>Dihitung dari resep contoh.</p>
-          {[
-            { name: "Daging ayam", need: chicken, have: stock[0].qty },
-            { name: "Beras premium", need: rice, have: stock[1].qty },
-          ].map((s) => (
+          <p>
+            {apiMode
+              ? "Dihitung dari resep tersimpan; diverifikasi server saat menyimpan."
+              : "Dihitung dari resep contoh."}
+          </p>
+          {requirements.map((s) => (
             <div className="requirement" key={s.name}>
               <b>{s.name}</b>
               <div>
                 <span>Kebutuhan</span>
-                <strong>{s.need.toFixed(2)} kg</strong>
+                <strong>
+                  {s.need.toFixed(2)} {s.unit}
+                </strong>
               </div>
               <div>
                 <span>Tersedia</span>
-                <span>{s.have.toFixed(2)} kg</span>
+                <span>
+                  {s.have.toFixed(2)} {s.unit}
+                </span>
               </div>
               <div className={s.need > s.have ? "shortage" : "enough"}>
                 {s.need > s.have
-                  ? `Kurang ${(s.need - s.have).toFixed(2)} kg`
+                  ? `Kurang ${(s.need - s.have).toFixed(2)} ${s.unit}`
                   : "Stok mencukupi"}
               </div>
             </div>
           ))}
           <small className="muted">
-            Preview mencakup ayam & beras. Lengkapi seluruh resep sebelum
-            dipakai operasional.
+            Resep seed hanya contoh. Lengkapi resep sebelum dipakai operasional.
           </small>
           <button
             className="button primary full"
-            onClick={() => {
-              if (approved) {
-                setApproved(false);
-              } else {
-                setApproved(true);
-                notify(
-                  "Rencana demo disetujui. Tidak ada stok aktual yang berubah.",
-                );
-              }
-            }}
+            disabled={pending}
+            onClick={() => void approvePlan()}
           >
             {approved ? (
               "Edit ulang rencana"
             ) : (
               <>
                 <Check size={16} />
-                Setujui rencana demo
+                {pending
+                  ? "Menyimpan..."
+                  : apiMode
+                    ? "Simpan & setujui rencana"
+                    : "Setujui rencana demo"}
               </>
             )}
           </button>
