@@ -5,7 +5,8 @@ export type Page =
   | "AI Forecasting"
   | "Kitchen Planner"
   | "Waste Analytics";
-export type ModalType = "stock" | "menu" | "waste" | "recipe" | null;
+export type ModalType =
+  "stock" | "menu" | "waste" | "recipe" | "edit-menu" | null;
 export type Food = {
   id: number;
   name: string;

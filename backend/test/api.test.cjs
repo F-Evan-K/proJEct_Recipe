@@ -262,6 +262,89 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
         );
       },
     );
+    await t.test(
+      "menu details save atomically and update planner",
+      async () => {
+        const before = await db.menuItem.findUnique({
+          where: { id: menu.id },
+          include: { recipe: true },
+        });
+        const body = {
+          name: key + " edited",
+          category: "Edited",
+          price: 15000,
+          recipe: { lines: [{ ingredientId: ingredient.id, quantity: 0.2 }] },
+        };
+        await request(server)
+          .put("/api/v1/menus/" + menu.id + "/details")
+          .send({
+            ...body,
+            recipe: { lines: [{ ingredientId: 2147483647, quantity: 1 }] },
+          })
+          .expect(400);
+        const unchanged = await db.menuItem.findUnique({
+          where: { id: menu.id },
+          include: { recipe: true },
+        });
+        assert.equal(unchanged.name, before.name);
+        assert.equal(
+          Number(unchanged.recipe[0].quantity),
+          Number(before.recipe[0].quantity),
+        );
+        await request(server)
+          .put("/api/v1/menus/" + menu.id + "/details")
+          .send({
+            ...body,
+            recipe: {
+              lines: [
+                { ingredientId: ingredient.id, quantity: 1 },
+                { ingredientId: ingredient.id, quantity: 2 },
+              ],
+            },
+          })
+          .expect(400);
+        await request(server)
+          .put("/api/v1/menus/" + menu.id + "/details")
+          .send({
+            ...body,
+            recipe: { lines: [{ ingredientId: ingredient.id, quantity: 0 }] },
+          })
+          .expect(400);
+        await request(server)
+          .put("/api/v1/menus/" + menu.id + "/details")
+          .send({ ...body, recipe: null })
+          .expect(400);
+        const updated = (
+          await request(server)
+            .put("/api/v1/menus/" + menu.id + "/details")
+            .send(body)
+            .expect(200)
+        ).body;
+        assert.equal(updated.name, body.name);
+        assert.equal(Number(updated.price), 15000);
+        const result = (
+          await post("/kitchen-plans/preview", {
+            items: [{ menuId: menu.id, portions: 30 }],
+          }).expect(201)
+        ).body;
+        assert.equal(result.ingredients[0].required, 6);
+        assert.equal(result.ingredients[0].shortage, 1);
+        await request(server)
+          .put("/api/v1/menus/" + menu.id + "/details")
+          .send({ ...body, recipe: { lines: [] } })
+          .expect(200);
+        await post("/kitchen-plans/preview", {
+          items: [{ menuId: menu.id, portions: 1 }],
+        }).expect(400);
+        await request(server)
+          .delete("/api/v1/menus/" + menu.id)
+          .expect(200);
+        assert.equal(
+          (await db.menuItem.findUnique({ where: { id: menu.id } })).active,
+          false,
+        );
+      },
+    );
     await post("/forecast-runs", {}).expect(503);
     const fresh = new PrismaService();
     try {

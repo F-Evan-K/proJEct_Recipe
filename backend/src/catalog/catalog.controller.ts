@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PrismaService } from "../prisma.service";
-import { IngredientDto, MenuDto, RecipeDto } from "../dto";
+import { IngredientDto, MenuDto, RecipeDto, MenuDetailsDto } from "../dto";
 @ApiTags("catalog")
 @Controller()
 export class CatalogController {
@@ -73,6 +73,43 @@ export class CatalogController {
     return this.db.menuItem.update({
       where: { id },
       data: { ...dto, name: dto.name.trim(), category: dto.category.trim() },
+    });
+  }
+  @Put("menus/:id/details") saveDetails(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() dto: MenuDetailsDto,
+  ) {
+    const { recipe, ...metadata } = dto;
+    if (
+      new Set(recipe.lines.map((l) => l.ingredientId)).size !==
+      recipe.lines.length
+    )
+      throw new BadRequestException("Duplicate ingredient in recipe");
+    return this.db.$transaction(async (tx) => {
+      if (!(await tx.menuItem.findUnique({ where: { id } })))
+        throw new NotFoundException("Menu not found");
+      const count = await tx.ingredient.count({
+        where: { id: { in: recipe.lines.map((l) => l.ingredientId) } },
+      });
+      if (count !== recipe.lines.length)
+        throw new BadRequestException("Unknown ingredient");
+      await tx.menuItem.update({
+        where: { id },
+        data: {
+          ...metadata,
+          name: metadata.name.trim(),
+          category: metadata.category.trim(),
+        },
+      });
+      await tx.recipeLine.deleteMany({ where: { menuId: id } });
+      if (recipe.lines.length)
+        await tx.recipeLine.createMany({
+          data: recipe.lines.map((l) => ({ ...l, menuId: id })),
+        });
+      return tx.menuItem.findUnique({
+        where: { id },
+        include: { recipe: { include: { ingredient: true } } },
+      });
     });
   }
   @Delete("menus/:id") archive(@Param("id", ParseIntPipe) id: number) {

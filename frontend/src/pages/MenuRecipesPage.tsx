@@ -1,8 +1,9 @@
-import { UtensilsCrossed, ArrowUpRight, Search } from "lucide-react";
+import { UtensilsCrossed, ArrowUpRight, Search, Pencil } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { money } from "../utils/format";
 export function MenuRecipesPage() {
-  const { foods, search, setSearch, setSelected, setModal } = useWorkspace();
+  const { foods, search, setSearch, setSelected, setModal, apiMode } =
+    useWorkspace();
   return (
     <>
       <div className="section-toolbar">
@@ -16,6 +17,12 @@ export function MenuRecipesPage() {
           />
         </label>
       </div>
+      {foods.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+        .length === 0 && (
+        <div className="empty">
+          Tidak ada menu yang cocok. Tambahkan menu atau ubah pencarian.
+        </div>
+      )}
       <div className="recipe-grid">
         {foods
           .filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
@@ -23,7 +30,9 @@ export function MenuRecipesPage() {
             <section className="card recipe-card" key={f.id}>
               <div className={"recipe-art food-" + f.id}>
                 {f.emoji}
-                <span className="badge">Aktif · Demo</span>
+                <span className="badge">
+                  {apiMode ? "Aktif · Tersimpan" : "Aktif · Demo"}
+                </span>
               </div>
               <div className="recipe-body">
                 <span className="eyebrow">{f.category}</span>
@@ -31,6 +40,16 @@ export function MenuRecipesPage() {
                 <p>
                   {money(f.price)} <span>/ porsi</span>
                 </p>
+                <button
+                  className="button white full menu-edit-button"
+                  onClick={() => {
+                    setSelected(f);
+                    setModal("edit-menu");
+                  }}
+                >
+                  <Pencil size={14} />
+                  Edit menu & resep
+                </button>
                 <div className="recipe-bottom">
                   <span>
                     <UtensilsCrossed size={14} /> Resep per porsi

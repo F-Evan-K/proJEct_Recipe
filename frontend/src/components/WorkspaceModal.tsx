@@ -1,3 +1,4 @@
+import { MenuEditorModal } from "./MenuEditorModal";
 import { ArrowRight, X, Check, Menu } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function WorkspaceModal() {
@@ -17,6 +18,7 @@ export function WorkspaceModal() {
     pending,
     submitApiData,
   } = useWorkspace();
+  if (modal === "edit-menu") return <MenuEditorModal key={selected.id} />;
   return (
     modal && (
       <div className="modal-backdrop" onClick={() => setModal(null)}>

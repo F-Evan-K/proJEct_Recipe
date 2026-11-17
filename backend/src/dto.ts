@@ -166,3 +166,11 @@ export class SaleDto {
   @ApiProperty({ type: Boolean, required: false })
   closed?: boolean;
 }
+
+export class MenuDetailsDto extends MenuDto {
+  @ValidateNested()
+  @Type(() => RecipeDto)
+  @IsNotEmpty()
+  @ApiProperty({ type: () => RecipeDto, required: true })
+  recipe: RecipeDto;
+}

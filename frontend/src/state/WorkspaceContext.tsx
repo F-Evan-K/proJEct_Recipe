@@ -9,6 +9,8 @@ import {
 import type { Page, ModalType, Food, StockItem, WasteRecord } from "../types";
 import { initialFoods, initialStock, initialWastes } from "../data/demo";
 import { apiMode, kitchenApi } from "../services/api";
+import { applyMenuEdit, type MenuEdit } from "../utils/recipe-editor";
+import { apiRequest } from "../services/api";
 function useWorkspaceState() {
   const [page, setPage] = useState<Page>("Dashboard");
   const [foods, setFoods] = useState<Food[]>(apiMode ? [] : initialFoods);
@@ -148,6 +150,86 @@ function useWorkspaceState() {
       setPending(false);
     }
   }
+  async function saveMenuEdit(food: Food, edit: MenuEdit) {
+    if (mutationLock.current) return false;
+    mutationLock.current = true;
+    setPending(true);
+    try {
+      if (apiMode) {
+        await apiRequest("/menus/" + food.id + "/details", {
+          method: "PUT",
+          body: JSON.stringify({
+            name: edit.name,
+            category: edit.category,
+            price: edit.price,
+            emoji: food.emoji,
+            recipe: { lines: edit.lines },
+          }),
+        });
+      } else {
+        const updated = applyMenuEdit(food, edit, stock);
+        setFoods((current) =>
+          current.map((f) => (f.id === food.id ? updated : f)),
+        );
+        setSelected(updated);
+      }
+      setApproved(false);
+      for (const key of requestKeys.current.keys())
+        if (key.startsWith('["plan"')) requestKeys.current.delete(key);
+      if (apiMode) {
+        try {
+          await refreshWorkspace();
+        } catch {
+          notify(
+            "Menu tersimpan, tetapi data terbaru gagal dimuat. Gunakan Coba lagi.",
+          );
+          return true;
+        }
+      }
+      notify(
+        apiMode
+          ? "Menu dan resep tersimpan di MySQL."
+          : "Menu dan resep demo diperbarui.",
+      );
+      return true;
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Gagal menyimpan menu");
+      return false;
+    } finally {
+      mutationLock.current = false;
+      setPending(false);
+    }
+  }
+  async function archiveMenu(food: Food) {
+    if (mutationLock.current) return false;
+    mutationLock.current = true;
+    setPending(true);
+    try {
+      if (apiMode) await apiRequest("/menus/" + food.id, { method: "DELETE" });
+      setFoods((current) => current.filter((f) => f.id !== food.id));
+      setApproved(false);
+      if (apiMode) {
+        try {
+          await refreshWorkspace();
+        } catch {
+          notify(
+            "Menu diarsipkan, tetapi daftar terbaru gagal dimuat. Gunakan Coba lagi.",
+          );
+          return true;
+        }
+      }
+      notify("Menu diarsipkan. Riwayat di database tetap tersimpan.");
+      return true;
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : "Gagal mengarsipkan menu",
+      );
+      return false;
+    } finally {
+      mutationLock.current = false;
+      setPending(false);
+    }
+  }
   async function approvePlan() {
     if (approved) {
       for (const key of requestKeys.current.keys())
@@ -275,6 +357,8 @@ function useWorkspaceState() {
     pending,
     refreshWorkspace,
     submitApiData,
+    saveMenuEdit,
+    archiveMenu,
     approvePlan,
     requirements,
   };
