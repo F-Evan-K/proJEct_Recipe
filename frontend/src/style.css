@@ -27,3 +27,39 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .sales-menu-ids { columns: 2 220px; padding-left: 20px; line-height: 1.8; }
 .sales-preview .table-wrap { padding: 0; margin: 12px 0; }
 .sales-preview select { padding: 7px; border: 1px solid #dfe5d8; border-radius: 7px; background: white; }
+
+.backtest-body { padding: 0 24px 24px; }
+.backtest-controls { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; }
+.backtest-form, .backtest-history { min-width: 0; border: 1px solid #dfe5d8; border-radius: 12px; padding: 18px; }
+.backtest-form fieldset { margin: 16px 0 0; padding: 0; border: 0; min-width: 0; }
+.backtest-form legend { padding: 0; font-weight: 700; margin-bottom: 6px; }
+.backtest-menu-options { display: grid; gap: 5px; max-height: 150px; overflow-y: auto; }
+.backtest-menu-options label { display: flex; gap: 6px; align-items: center; min-height: 30px; }
+.backtest-menu-options input, .backtest-report input { accent-color: #34563e; }
+.backtest-history h4, .backtest-report h4 { margin: 0; font-size: 16px; }
+.backtest-history ul { list-style: none; margin: 10px 0; padding: 0; max-height: 262px; overflow-y: auto; display: grid; gap: 5px; }
+.backtest-history li button { width: 100%; min-height: 52px; border-radius: 8px; display: flex; gap: 8px; text-align: left; justify-content: space-between; align-items: center; padding: 8px 10px; }
+.backtest-history li button[aria-pressed="true"] { background: #edf3e7; outline: 1px solid #cbd9ca; outline-offset: -1px; }
+.backtest-history small { display: block; margin-top: 4px; color: #516151; }
+.backtest-run { border-top: 1px solid #e4e9df; margin-top: 20px; padding-top: 18px; }
+.backtest-report-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0; }
+.backtest-report-heading p { margin: 5px 0 0; }
+.backtest-report select { max-width: 100%; padding: 7px; border: 1px solid #dfe5d8; border-radius: 7px; background: white; }
+.backtest-report .table-wrap { padding: 0; margin: 10px 0; }
+.backtest-report caption { padding: 10px; text-align: left; color: #43594c; }
+.backtest-report td small { white-space: nowrap; }
+.backtest-caption { color: #506051; font-size: 13px; line-height: 1.6; }
+.backtest-skip-list { margin: 10px 0; padding-left: 20px; display: flex; flex-wrap: wrap; gap: 6px 24px; }
+.backtest-source { margin-top: 14px; }
+.backtest-source code { overflow-wrap: anywhere; }
+.backtest-chart { background: #f5f7f2; border-radius: 10px; padding: 14px; margin: 12px 0; }
+.backtest-chart-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; color: #455c4d; }
+.backtest-chart-legend span::before { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 5px; }
+.legend-actual::before { content: ""; background: #34563e; }
+.legend-prediction::before { content: ""; background: #ad7549; }
+.backtest-chart-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(26px, 1fr); gap: 4px; overflow-x: auto; margin-top: 10px; }
+.backtest-chart-day { text-align: center; }
+.backtest-chart-pair { display: flex; height: 98px; align-items: flex-end; justify-content: center; gap: 2px; border-bottom: 1px solid #abb9aa; }
+.backtest-chart-pair span { width: 10px; border-radius: 2px 2px 0 0; background: #34563e; }
+.backtest-chart-pair span + span { background: #ad7549; }
+@media (max-width: 760px) { .backtest-controls { grid-template-columns: 1fr; } .backtest-body { padding: 0 16px 16px; } }

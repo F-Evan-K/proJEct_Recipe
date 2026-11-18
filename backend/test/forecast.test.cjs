@@ -62,6 +62,8 @@ test("forecast pipeline uses authenticated, date-filtered database sales and han
       await client.post("/api/v1/forecast-runs").send({ targetDate }).expect(201);
     });
     await t.test("outage returns a clear error and releases the processing lock", async () => {
+      global.fetch = async () => new Response(null, { status: 429 });
+      await client.post("/api/v1/forecast-runs").send({ targetDate }).expect(429);
       global.fetch = async () => { throw Error("synthetic network outage"); };
       await client.post("/api/v1/forecast-runs").send({ targetDate }).expect(503);
       await client.post("/api/v1/forecast-runs").send({ targetDate }).expect(503);

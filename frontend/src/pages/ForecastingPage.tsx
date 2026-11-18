@@ -4,6 +4,7 @@ import { useWorkspace } from "../state/WorkspaceContext";
 import { apiRequest, kitchenApi } from "../services/api";
 import { jakartaToday, tomorrowDate, type ForecastResult, type Sale } from "../types/forecast";
 import { SalesCsvImport } from "../components/SalesCsvImport";
+import { ForecastBacktests } from "../components/ForecastBacktests";
 
 export function ForecastingPage() {
   const { foods, setFoods, go, notify, apiMode, setApproved, setPlanDate } = useWorkspace();
@@ -96,6 +97,7 @@ export function ForecastingPage() {
         <td><b>{i.name}</b><p>{i.reason}</p><details><summary>Catatan data</summary>{i.warnings.map(w => <p key={w}>{w}</p>)}</details></td><td>{i.observations}/42 minimum</td><td>{i.quantity == null ? "Belum tersedia" : `${i.quantity} porsi`}</td><td>{i.evaluation ? <><b>{i.method === "random_forest" ? "Random Forest" : "Rata-rata hari sejenis"}</b><p>MAE baseline: {i.evaluation.baseline.mae} · RF: {i.evaluation.randomForest.mae}</p><p>WAPE baseline: {i.evaluation.baseline.wape == null ? "N/A" : i.evaluation.baseline.wape + "%"} · RF: {i.evaluation.randomForest.wape == null ? "N/A" : i.evaluation.randomForest.wape + "%"}</p><small>Uji {i.evaluation.testCount} hari: {i.evaluation.testStart} – {i.evaluation.testEnd}. MAE dalam porsi; WAPE lebih kecil lebih baik. Bukan persentase akurasi.</small></> : "Evaluasi belum tersedia"}</td>
       </tr>)}</tbody></table></div>}
     </section>
+    <ForecastBacktests menus={foods} />
     <SalesCsvImport menus={foods} busy={busy || loading} setBusy={setBusy} onImported={refreshAfterSale} />
     <section className="card"><div className="card-header"><div><h3>Riwayat penjualan terbaru</h3><p>Model membaca 84 hari langsung dari database. Tampilan di bawah menampilkan 30 dari maksimal 365 catatan terbaru.</p></div><button className="button white" disabled={loading || busy} onClick={() => void loadSales()}>Muat ulang</button></div>
       <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Menu</th><th>Porsi</th><th>Kondisi</th></tr></thead><tbody>{sales.slice(0, 30).map(s => <tr key={s.menuId + s.businessDate}><td>{s.businessDate.slice(0, 10)}</td><td>{s.menu.name}</td><td>{s.quantity}</td><td>{s.closed ? "Tutup" : s.stockout ? "Kehabisan stok" : "Normal"}</td></tr>)}{!sales.length && <tr><td colSpan={4}>{loading ? "Memuat riwayat…" : "Belum ada penjualan. Mulai catat data aktual melalui formulir di atas."}</td></tr>}</tbody></table></div>

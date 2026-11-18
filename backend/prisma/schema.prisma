@@ -90,6 +90,36 @@ model KitchenPlan {
   createdAt      DateTime  @default(now())
 }
 
+enum BacktestStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model ForecastBacktest {
+  id          Int            @id @default(autoincrement())
+  sourceHash  String         @unique @db.Char(64)
+  protocol    String         @db.VarChar(40)
+  startDate   DateTime       @db.Date
+  endDate     DateTime       @db.Date
+  menuCount   Int
+  startedById Int
+  snapshot    Json
+  result      Json?
+  status      BacktestStatus @default(QUEUED)
+  attempts    Int            @default(0)
+  availableAt DateTime       @default(now())
+  leaseUntil  DateTime?
+  leaseToken  String?        @db.Char(36)
+  error       String?        @db.VarChar(255)
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  @@index([status, availableAt])
+  @@index([status, leaseUntil])
+}
+
 enum UserRole {
   ADMIN
   STAFF

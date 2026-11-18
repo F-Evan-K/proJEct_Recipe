@@ -82,6 +82,16 @@ Kalau Vite memilih port lain, buka alamat **Local** yang ditampilkan terminal. T
 
 Model membandingkan Random Forest dan rata-rata hari sejenis. Setiap menu perlu minimal 42 catatan hari buka tanpa stockout dalam 84 hari terakhir. Hari tanpa catatan dibiarkan kosong. MAE dan WAPE di halaman berasal dari tujuh observasi uji dan belum cukup untuk menyimpulkan akurasi bisnis. Beberapa grafik dashboard masih memakai ilustrasi.
 
+## Uji forecast dari riwayat
+
+Untuk instalasi yang sudah ada, jalankan `npm run db:generate` dan `npm run db:migrate`, lalu mulai ulang backend serta layanan Python. Pada **AI Forecasting → Uji forecast dari riwayat**, pilih 1–5 menu dan periode 7–42 hari yang berakhir paling lambat kemarin (WIB).
+
+- Setiap tanggal diuji ulang dengan jendela 84 hari sebelumnya. Random Forest dan rata-rata hari sejenis dibandingkan pada tanggal aktual yang sama. Kolom **Strategi KitchenFlow** mengikuti pemilihan model untuk estimasi harian, memakai tujuh observasi valid terakhir dari riwayat sebelum tanggal uji.
+- MAE menunjukkan rata-rata selisih absolut dalam porsi. WAPE membandingkan total selisih absolut dengan total porsi aktual. Bias positif berarti prediksi cenderung terlalu tinggi. Laporan menunjukkan cakupan tanggal yang dinilai serta alasan hari lain dilewati.
+- MySQL menyimpan salinan data saat evaluasi diminta dan hasilnya. Permintaan dengan periode, menu, dan data yang sama membuka evaluasi yang sudah ada. Jika catatan berubah, permintaan berikutnya membuat evaluasi baru. Hasil bisa dibuka dari **Riwayat evaluasi** atau diekspor ke CSV.
+- Backtest memakai nilai penjualan yang tersimpan saat evaluasi dibuat, termasuk koreksi historis. Hasilnya mengukur performa pada periode dan menu yang dipilih. Untuk pelaporan akademik, simpan periode akhir terpisah jika menggunakan hasil ini untuk menyetel model.
+- Backend memproses antrean selama berjalan. Jika proses berhenti saat menangani evaluasi, backend bisa mengambil ulang pekerjaan itu setelah lease dua menit berakhir. Detail gagal bisa dicoba ulang dengan salinan data yang sama.
+
 ## Pengujian dan kolaborasi
 
 ```cmd
@@ -90,6 +100,6 @@ npm test
 .\ml-service\.venv\Scripts\python.exe -m unittest discover -s ml-service -p "test_*.py"
 ```
 
-`npm test` membutuhkan MySQL lokal dengan migrasi yang sudah diterapkan. Untuk tes dari impor sampai estimasi, jalankan layanan Python terlebih dahulu, lalu jalankan `node --test test-integration/forecast.cjs` dari folder `backend`.
+`npm test` membutuhkan MySQL lokal dengan migrasi yang sudah diterapkan. Untuk menguji layanan Python dari backend, jalankan layanan Python terlebih dahulu, lalu jalankan `node --test --test-concurrency=1 test-integration/forecast.cjs test-integration/backtest.cjs` dari folder `backend`.
 
 Untuk mulai mengerjakan fitur baru, jalankan `git switch main`, `git pull --ff-only`, lalu buat branch sendiri dengan `git switch -c feat/nama-fitur`. Setelah pekerjaanmu dipush, buat pull request menuju `main`.

@@ -14,6 +14,8 @@ import { RecordsController } from "./records/records.controller";
 import { HealthController } from "./health.controller";
 import { ForecastController } from "./forecast/forecast.controller";
 import { SalesImportController } from "./records/sales-import.controller";
+import { BacktestController } from "./forecast/backtest.controller";
+import { BacktestService } from "./forecast/backtest.service";
 @Module({
   controllers: [
     HealthController,
@@ -24,10 +26,12 @@ import { SalesImportController } from "./records/sales-import.controller";
     RecordsController,
     SalesImportController,
     ForecastController,
+    BacktestController,
   ],
   providers: [
     PrismaService,
     AuthService,
+    BacktestService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })

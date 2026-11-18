@@ -48,6 +48,8 @@ export class ForecastController {
       } catch {
         throw new ServiceUnavailableException("Layanan forecasting belum berjalan atau melewati batas waktu. Data penjualan tetap tersimpan.");
       }
+      if (response.status === 429)
+        throw new HttpException("Layanan Python sedang menghitung evaluasi atau forecast lain. Coba lagi sebentar.", 429);
       if (!response.ok) throw new ServiceUnavailableException("Layanan forecasting gagal memproses data. Periksa layanan ML dan kunci koneksinya.");
       return response.json();
     } finally {

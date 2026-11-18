@@ -2,6 +2,7 @@ import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule, configureApp } from "./app";
+import { BacktestService } from "./forecast/backtest.service";
 async function bootstrap() {
   if (!process.env.DATABASE_URL)
     throw Error(
@@ -29,6 +30,7 @@ async function bootstrap() {
   if (!Number.isInteger(port) || port < 1 || port > 65535)
     throw Error("Invalid PORT");
   await app.listen(port, "127.0.0.1");
+  app.get(BacktestService).start();
   console.log("KitchenFlow API: http://127.0.0.1:" + port + "/api/docs");
 }
 bootstrap().catch((error) => {
