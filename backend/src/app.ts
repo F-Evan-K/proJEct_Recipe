@@ -12,6 +12,8 @@ import { InventoryController } from "./inventory/inventory.controller";
 import { PlannerController } from "./planner/planner.controller";
 import { RecordsController } from "./records/records.controller";
 import { HealthController } from "./health.controller";
+import { ForecastController } from "./forecast/forecast.controller";
+import { SalesImportController } from "./records/sales-import.controller";
 @Module({
   controllers: [
     HealthController,
@@ -20,6 +22,8 @@ import { HealthController } from "./health.controller";
     InventoryController,
     PlannerController,
     RecordsController,
+    SalesImportController,
+    ForecastController,
   ],
   providers: [
     PrismaService,

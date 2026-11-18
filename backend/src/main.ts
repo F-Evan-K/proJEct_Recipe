@@ -12,7 +12,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle("KitchenFlow API")
     .setDescription(
-      "Single-outlet API with session login and ADMIN/STAFF roles. Public signup requires owner approval. Forecasting is not connected.",
+      "Single-outlet API with session login, owner approval, sales import, and forecasting through the local Python service.",
     )
     .setVersion("0.2.0")
     .addApiKey(

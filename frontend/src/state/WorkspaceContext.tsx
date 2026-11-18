@@ -12,6 +12,7 @@ import { initialFoods, initialStock, initialWastes } from "../data/demo";
 import { apiMode, kitchenApi } from "../services/api";
 import { applyMenuEdit, type MenuEdit } from "../utils/recipe-editor";
 import { apiRequest } from "../services/api";
+import { tomorrowDate } from "../types/forecast";
 function useWorkspaceState() {
   const { isAdmin } = useAuth();
   const [page, setPage] = useState<Page>("Dashboard");
@@ -26,6 +27,7 @@ function useWorkspaceState() {
   const [modal, setModal] = useState<ModalType>(null);
   const [selected, setSelected] = useState(initialFoods[0]);
   const [approved, setApproved] = useState(false);
+  const [planDate, setPlanDate] = useState(tomorrowDate);
   const [forecasted, setForecasted] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [apiReady, setApiReady] = useState(!apiMode);
@@ -266,10 +268,10 @@ function useWorkspaceState() {
     mutationLock.current = true;
     setPending(true);
     const items = foods.map((f) => ({ menuId: f.id, portions: f.portions }));
-    const fingerprint = JSON.stringify(["plan", items]);
+    const fingerprint = JSON.stringify(["plan", planDate, items]);
     try {
       const plan = await kitchenApi.post<{ id: number }>("/kitchen-plans", {
-        businessDate: "2026-11-16",
+        businessDate: planDate,
         items,
         idempotencyKey: requestKey(fingerprint),
       });
@@ -326,18 +328,18 @@ function useWorkspaceState() {
   const requirements = [...required.values()];
   const download = () => {
     const rows = [
-      "menu,forecast_demo,porsi_rencana",
-      ...foods.map((f) => `${f.name},${f.forecast},${f.portions}`),
+      "tanggal,menu,estimasi_tersalin,porsi_rencana",
+      ...foods.map((f) => `${planDate},"${f.name.replaceAll('"', '""')}",${f.forecast},${f.portions}`),
     ];
     const url = URL.createObjectURL(
       new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" }),
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = "kitchenflow-rencana-demo.csv";
+    a.download = `kitchenflow-rencana-${planDate}${apiMode ? "" : "-demo"}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    notify("Rencana demo berhasil diekspor");
+    notify("Rencana berhasil diekspor");
   };
 
   return {
@@ -360,6 +362,8 @@ function useWorkspaceState() {
     selected,
     setSelected,
     approved,
+    planDate,
+    setPlanDate,
     setApproved,
     forecasted,
     setForecasted,

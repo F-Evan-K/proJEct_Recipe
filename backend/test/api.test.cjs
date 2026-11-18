@@ -358,7 +358,7 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
         );
       },
     );
-    await post("/forecast-runs", {}).expect(503);
+    await post("/forecast-runs", {}).expect(400);
     const fresh = new PrismaService();
     try {
       await fresh.$connect();

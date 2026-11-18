@@ -3,7 +3,7 @@ import { ChevronDown, Plus, CalendarDays, Download, Menu } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function PageHeading() {
   const { isAdmin } = useAuth();
-  const { page, period, setPeriod, download, setForecasted, notify, setModal } =
+  const { page, period, setPeriod, download, setModal } =
     useWorkspace();
   return (
     <div className="page-heading">
@@ -31,7 +31,7 @@ export function PageHeading() {
         </p>
       </div>
       <div className="heading-action">
-        {page === "Kelola Akun" ? (
+        {page === "AI Forecasting" ? <span className="badge green">Riwayat penjualan → Estimasi</span> : page === "Kelola Akun" ? (
           <span className="badge green">Pemilik / Admin</span>
         ) : !isAdmin && (page === "Inventory" || page === "Menu & Resep") ? (
           <span className="badge">Akses baca · Staf</span>
@@ -55,12 +55,6 @@ export function PageHeading() {
           <button
             className="button primary"
             onClick={() => {
-              if (page === "AI Forecasting") {
-                setForecasted(true);
-                notify(
-                  "Simulasi diperbarui. Angka tetap data demo, belum berasal dari model ML.",
-                );
-              } else
                 setModal(
                   page === "Inventory"
                     ? "stock"
@@ -75,9 +69,7 @@ export function PageHeading() {
               ? "Tambah stok"
               : page === "Menu & Resep"
                 ? "Tambah menu"
-                : page === "AI Forecasting"
-                  ? "Simulasikan forecast"
-                  : "Catat waste"}
+                : "Catat waste"}
           </button>
         )}
       </div>

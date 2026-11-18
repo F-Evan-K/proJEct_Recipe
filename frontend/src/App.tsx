@@ -41,8 +41,7 @@ function Workspace() {
               <div>
                 <b>MySQL lokal · {apiReady ? "terhubung" : "memuat data"}</b>
                 <p>
-                  Menu, inventory, waste dan rencana memakai API. Grafik dan
-                  forecasting tetap ilustrasi, belum memakai model AI.
+                  Menu, inventory, waste dan rencana memakai API. Estimasi tersedia di AI Forecasting setelah data cukup dan layanan Python aktif. Grafik dashboard masih ilustratif.
                 </p>
                 {apiError && <p role="alert">Gagal memuat: {apiError}</p>}
               </div>

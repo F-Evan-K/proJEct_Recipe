@@ -5,12 +5,12 @@ import {
   Post,
   BadRequestException,
   NotFoundException,
-  ServiceUnavailableException,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { SaleDto } from "../dto";
+import { jakartaBusinessDate, saleConditionError } from "./sale-rules";
 @ApiTags("records")
 @Controller()
 export class RecordsController {
@@ -23,8 +23,8 @@ export class RecordsController {
     });
   }
   @Post("sales") async sale(@Body() dto: SaleDto) {
-    if (dto.closed && dto.quantity !== 0)
-      throw new BadRequestException("Closed day must have zero sales");
+    const error = saleConditionError(dto, jakartaBusinessDate());
+    if (error) throw new BadRequestException(error);
     if (!(await this.db.menuItem.findUnique({ where: { id: dto.menuId } })))
       throw new NotFoundException("Menu not found");
     const businessDate = new Date(dto.businessDate + "T00:00:00.000Z");
@@ -59,10 +59,5 @@ export class RecordsController {
       notice:
         "Different units are never added together. No waste-reduction claim is measured.",
     };
-  }
-  @Post("forecast-runs") forecast() {
-    throw new ServiceUnavailableException(
-      "Forecasting model and dataset are not connected yet. No fabricated predictions are returned.",
-    );
   }
 }

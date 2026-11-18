@@ -7,6 +7,7 @@ export function KitchenPlannerPage() {
     foods,
     setFoods,
     approved,
+    planDate,
     setApproved,
     total,
     chicken,
@@ -23,7 +24,7 @@ export function KitchenPlannerPage() {
       <div className="plan-banner">
         <div>
           <span className="eyebrow">TOMORROW'S KITCHEN PLAN</span>
-          <h2>Senin, 16 November 2026</h2>
+          <h2>{new Intl.DateTimeFormat("id-ID", { dateStyle: "full", timeZone: "UTC" }).format(new Date(planDate + "T00:00:00Z"))}</h2>
           <p>Atur porsi, cek kebutuhan, lalu setujui rencana.</p>
         </div>
         <span className={"badge " + (approved ? "green" : "amber")}>
@@ -50,7 +51,7 @@ export function KitchenPlannerPage() {
               <thead>
                 <tr>
                   <th>Menu</th>
-                  <th>Forecast demo</th>
+                  <th>{apiMode ? "Estimasi tersalin" : "Forecast demo"}</th>
                   <th>Porsi rencana</th>
                 </tr>
               </thead>
