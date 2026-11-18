@@ -4,7 +4,8 @@ export type Page =
   | "Menu & Resep"
   | "AI Forecasting"
   | "Kitchen Planner"
-  | "Waste Analytics";
+  | "Waste Analytics"
+  | "Kelola Akun";
 export type ModalType =
   "stock" | "menu" | "waste" | "recipe" | "edit-menu" | null;
 export type Food = {

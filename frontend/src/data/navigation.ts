@@ -6,4 +6,5 @@ export const pages: Page[] = [
   "AI Forecasting",
   "Kitchen Planner",
   "Waste Analytics",
+  "Kelola Akun",
 ];

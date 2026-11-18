@@ -1,3 +1,7 @@
+import { APP_GUARD } from "@nestjs/core";
+import { AuthGuard } from "./auth/auth.guard";
+import { AuthService } from "./auth/auth.service";
+import { AuthController } from "./auth/auth.controller";
 import "reflect-metadata";
 import { Module, ValidationPipe } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
@@ -11,12 +15,17 @@ import { HealthController } from "./health.controller";
 @Module({
   controllers: [
     HealthController,
+    AuthController,
     CatalogController,
     InventoryController,
     PlannerController,
     RecordsController,
   ],
-  providers: [PrismaService],
+  providers: [
+    PrismaService,
+    AuthService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+  ],
 })
 export class AppModule {}
 export function configureApp(app: INestApplication) {
@@ -38,7 +47,8 @@ export function configureApp(app: INestApplication) {
   app.enableCors({
     origin: origins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: false,
+    credentials: true,
+    allowedHeaders: ["Content-Type", "X-KitchenFlow-Request"],
   });
   app.enableShutdownHooks();
 }

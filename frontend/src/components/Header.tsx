@@ -1,6 +1,8 @@
+import { useAuth } from "../auth/AuthContext";
 import { Bell, Menu } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function Header() {
+  const { user } = useAuth();
   const { page, mobile, setMobile, notify, apiMode } = useWorkspace();
   return (
     <header className="topbar">
@@ -32,7 +34,9 @@ export function Header() {
           <Bell size={19} />
           <i />
         </button>
-        <div className="avatar small">CL</div>
+        <div className="avatar small" title={user?.name}>
+          {user?.name.slice(0, 2).toUpperCase()}
+        </div>
       </div>
     </header>
   );

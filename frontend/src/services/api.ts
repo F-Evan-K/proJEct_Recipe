@@ -1,27 +1,43 @@
 export const apiMode =
   (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env
     .VITE_DATA_MODE === "api";
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+  }
+}
 const base =
   (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env
-    .VITE_API_URL ?? "http://127.0.0.1:3000/api/v1";
+    .VITE_API_URL ?? "/api/v1";
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
   const response = await fetch(base + path, {
     ...options,
+    credentials: "include",
     signal: options.signal ?? AbortSignal.timeout(15000),
-    headers: { "Content-Type": "application/json", ...options.headers },
+    headers: {
+      "Content-Type": "application/json",
+      "X-KitchenFlow-Request": "1",
+      ...options.headers,
+    },
   });
   const data = await response.json();
   if (!response.ok) {
     const error = data.error;
-    throw new Error(
+    if (response.status === 401 && !path.startsWith("/auth/"))
+      window.dispatchEvent(new Event("kitchenflow:unauthorized"));
+    throw new ApiError(
       typeof error === "string"
         ? error
         : Array.isArray(error?.message)
           ? error.message.join(", ")
           : (error?.message ?? "API request failed (" + response.status + ")"),
+      response.status,
     );
   }
   return data as T;

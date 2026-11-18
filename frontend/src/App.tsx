@@ -1,3 +1,6 @@
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { AuthPage } from "./pages/AuthPage";
+import { AccountsPage } from "./pages/AccountsPage";
 import type { ComponentType } from "react";
 import type { Page } from "./types";
 import { WorkspaceProvider, useWorkspace } from "./state/WorkspaceContext";
@@ -20,6 +23,7 @@ const pageComponents: Record<Page, ComponentType> = {
   "AI Forecasting": ForecastingPage,
   "Kitchen Planner": KitchenPlannerPage,
   "Waste Analytics": WasteAnalyticsPage,
+  "Kelola Akun": AccountsPage,
 };
 function Workspace() {
   const { page, apiMode, apiReady, apiError, refreshWorkspace } =
@@ -61,10 +65,25 @@ function Workspace() {
     </div>
   );
 }
-export default function App() {
+function AuthGate() {
+  const { user, loading } = useAuth();
+  if (loading)
+    return (
+      <div className="auth-loading" role="status">
+        Menyiapkan KitchenFlow...
+      </div>
+    );
+  if (!user) return <AuthPage />;
   return (
-    <WorkspaceProvider>
+    <WorkspaceProvider key={user.id}>
       <Workspace />
     </WorkspaceProvider>
+  );
+}
+export default function App() {
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
   );
 }

@@ -89,3 +89,31 @@ model KitchenPlan {
   approvedAt     DateTime?
   createdAt      DateTime  @default(now())
 }
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(254)
+  passwordHash String    @db.VarChar(255)
+  role         UserRole  @default(STAFF)
+  active       Boolean   @default(false)
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique @db.Char(64)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}

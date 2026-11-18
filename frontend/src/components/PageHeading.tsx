@@ -1,6 +1,8 @@
+import { useAuth } from "../auth/AuthContext";
 import { ChevronDown, Plus, CalendarDays, Download, Menu } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function PageHeading() {
+  const { isAdmin } = useAuth();
   const { page, period, setPeriod, download, setForecasted, notify, setModal } =
     useWorkspace();
   return (
@@ -14,7 +16,7 @@ export function PageHeading() {
         </h1>
         <p>
           {page === "Dashboard"
-            ? "Selamat pagi, tim Culina. Mari siapkan dapur untuk hari yang lebih baik."
+            ? "Selamat datang, tim KitchenFlow. Mari siapkan dapur untuk hari yang lebih baik."
             : page === "Kitchen Planner"
               ? "Dari prediksi menjadi persiapan. Kamu tetap pegang kendali."
               : page === "AI Forecasting"
@@ -23,11 +25,17 @@ export function PageHeading() {
                   ? "Kenali stokmu. Siapkan yang cukup, tanpa berlebih."
                   : page === "Menu & Resep"
                     ? "Resep yang terukur untuk setiap porsi yang istimewa."
-                    : "Kenali yang tersisa, perbaiki yang bisa."}
+                    : page === "Kelola Akun"
+                      ? "Kelola akses tim dapurmu dengan jelas dan aman."
+                      : "Kenali yang tersisa, perbaiki yang bisa."}
         </p>
       </div>
       <div className="heading-action">
-        {page === "Dashboard" ? (
+        {page === "Kelola Akun" ? (
+          <span className="badge green">Pemilik / Admin</span>
+        ) : !isAdmin && (page === "Inventory" || page === "Menu & Resep") ? (
+          <span className="badge">Akses baca · Staf</span>
+        ) : page === "Dashboard" ? (
           <button
             className="button white"
             onClick={() =>

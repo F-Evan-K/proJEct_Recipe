@@ -12,9 +12,13 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle("KitchenFlow API")
     .setDescription(
-      "Single-outlet local development API. No authentication yet; do not expose publicly. Forecasting is not connected.",
+      "Single-outlet API with session login and ADMIN/STAFF roles. Public signup requires owner approval. Forecasting is not connected.",
     )
-    .setVersion("0.1.0")
+    .setVersion("0.2.0")
+    .addApiKey(
+      { type: "apiKey", in: "header", name: "X-KitchenFlow-Request" },
+      "requestProtection",
+    )
     .build();
   SwaggerModule.setup(
     "api/docs",

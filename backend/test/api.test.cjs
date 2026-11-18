@@ -62,12 +62,27 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
   const ingredients = [],
     menus = [],
     plans = [];
-  const post = (url, body) =>
-    request(server)
-      .post("/api/v1" + url)
-      .send(body);
+  const client = request.agent(server).set("X-KitchenFlow-Request", "1");
+  let ownerId;
+  const post = (url, body) => client.post("/api/v1" + url).send(body);
   try {
-    await request(server).get("/api/v1/health/ready").expect(200);
+    const { hashPassword } = require("../dist/auth/password");
+    const password = "Test-local-" + key;
+    const owner = await db.user.create({
+      data: {
+        name: "Test owner",
+        email: key + "@example.test",
+        passwordHash: await hashPassword(password),
+        role: "ADMIN",
+        active: true,
+      },
+    });
+    ownerId = owner.id;
+    await client
+      .post("/api/v1/auth/login")
+      .send({ email: owner.email, password })
+      .expect(201);
+    await client.get("/api/v1/health/ready").expect(200);
     await t.test("rejects unknown fields and invalid quantities", async () => {
       await post("/ingredients", {
         name: "bad",
@@ -134,14 +149,14 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
       }).expect(201)
     ).body;
     menus.push(menu.id);
-    await request(server)
+    await client
       .put("/api/v1/menus/" + menu.id + "/recipe")
       .send({ lines: [{ ingredientId: ingredient.id, quantity: 0.15 }] })
       .expect(200);
     await t.test(
       "invalid replacement leaves existing recipe intact",
       async () => {
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/recipe")
           .send({
             lines: [
@@ -150,7 +165,7 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
             ],
           })
           .expect(400);
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/recipe")
           .send({ lines: [{ ingredientId: 2147483647, quantity: 1 }] })
           .expect(400);
@@ -275,7 +290,7 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
           price: 15000,
           recipe: { lines: [{ ingredientId: ingredient.id, quantity: 0.2 }] },
         };
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/details")
           .send({
             ...body,
@@ -291,7 +306,7 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
           Number(unchanged.recipe[0].quantity),
           Number(before.recipe[0].quantity),
         );
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/details")
           .send({
             ...body,
@@ -303,19 +318,19 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
             },
           })
           .expect(400);
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/details")
           .send({
             ...body,
             recipe: { lines: [{ ingredientId: ingredient.id, quantity: 0 }] },
           })
           .expect(400);
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/details")
           .send({ ...body, recipe: null })
           .expect(400);
         const updated = (
-          await request(server)
+          await client
             .put("/api/v1/menus/" + menu.id + "/details")
             .send(body)
             .expect(200)
@@ -329,16 +344,14 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
         ).body;
         assert.equal(result.ingredients[0].required, 6);
         assert.equal(result.ingredients[0].shortage, 1);
-        await request(server)
+        await client
           .put("/api/v1/menus/" + menu.id + "/details")
           .send({ ...body, recipe: { lines: [] } })
           .expect(200);
         await post("/kitchen-plans/preview", {
           items: [{ menuId: menu.id, portions: 1 }],
         }).expect(400);
-        await request(server)
-          .delete("/api/v1/menus/" + menu.id)
-          .expect(200);
+        await client.delete("/api/v1/menus/" + menu.id).expect(200);
         assert.equal(
           (await db.menuItem.findUnique({ where: { id: menu.id } })).active,
           false,
@@ -370,6 +383,7 @@ test("real MySQL API lifecycle, validation, idempotency, and persistence", async
       where: { ingredientId: { in: ingredients } },
     });
     await db.ingredient.deleteMany({ where: { id: { in: ingredients } } });
+    if (ownerId) await db.user.delete({ where: { id: ownerId } });
     await app.close();
   }
 });

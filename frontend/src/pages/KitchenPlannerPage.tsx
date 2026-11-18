@@ -1,6 +1,8 @@
+import { useAuth } from "../auth/AuthContext";
 import { Plus, Check, Menu, CircleHelp, Minus } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 export function KitchenPlannerPage() {
+  const { isAdmin } = useAuth();
   const {
     foods,
     setFoods,
@@ -172,7 +174,7 @@ export function KitchenPlannerPage() {
           </small>
           <button
             className="button primary full"
-            disabled={pending}
+            disabled={pending || !isAdmin}
             onClick={() => void approvePlan()}
           >
             {approved ? (

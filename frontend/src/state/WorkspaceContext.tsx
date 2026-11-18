@@ -1,3 +1,4 @@
+import { useAuth } from "../auth/AuthContext";
 import {
   createContext,
   useContext,
@@ -12,6 +13,7 @@ import { apiMode, kitchenApi } from "../services/api";
 import { applyMenuEdit, type MenuEdit } from "../utils/recipe-editor";
 import { apiRequest } from "../services/api";
 function useWorkspaceState() {
+  const { isAdmin } = useAuth();
   const [page, setPage] = useState<Page>("Dashboard");
   const [foods, setFoods] = useState<Food[]>(apiMode ? [] : initialFoods);
   const [stock, setStock] = useState<StockItem[]>(apiMode ? [] : initialStock);
@@ -111,6 +113,12 @@ function useWorkspaceState() {
     if (mutationLock.current) return false;
     mutationLock.current = true;
     setPending(true);
+    if (!isAdmin && (type === "menu" || type === "stock")) {
+      mutationLock.current = false;
+      setPending(false);
+      notify("Tindakan ini hanya untuk pemilik/admin.");
+      return false;
+    }
     const name = String(data.get("name"));
     const fingerprint = JSON.stringify([type, ...data.entries()]);
     try {
@@ -151,6 +159,10 @@ function useWorkspaceState() {
     }
   }
   async function saveMenuEdit(food: Food, edit: MenuEdit) {
+    if (!isAdmin) {
+      notify("Tindakan ini hanya untuk pemilik/admin.");
+      return false;
+    }
     if (mutationLock.current) return false;
     mutationLock.current = true;
     setPending(true);
@@ -201,6 +213,10 @@ function useWorkspaceState() {
     }
   }
   async function archiveMenu(food: Food) {
+    if (!isAdmin) {
+      notify("Tindakan ini hanya untuk pemilik/admin.");
+      return false;
+    }
     if (mutationLock.current) return false;
     mutationLock.current = true;
     setPending(true);
@@ -231,6 +247,10 @@ function useWorkspaceState() {
     }
   }
   async function approvePlan() {
+    if (!isAdmin) {
+      notify("Tindakan ini hanya untuk pemilik/admin.");
+      return false;
+    }
     if (approved) {
       for (const key of requestKeys.current.keys())
         if (key.startsWith('["plan"')) requestKeys.current.delete(key);

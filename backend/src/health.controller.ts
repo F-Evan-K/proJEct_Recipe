@@ -1,7 +1,9 @@
+import { Public } from "./auth/auth.guard";
 import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PrismaService } from "./prisma.service";
 @ApiTags("health")
+@Public()
 @Controller("health")
 export class HealthController {
   constructor(private readonly db: PrismaService) {}

@@ -1,7 +1,9 @@
+import { useAuth } from "../auth/AuthContext";
 import { UtensilsCrossed, ArrowUpRight, Search, Pencil } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { money } from "../utils/format";
 export function MenuRecipesPage() {
+  const { isAdmin } = useAuth();
   const { foods, search, setSearch, setSelected, setModal, apiMode } =
     useWorkspace();
   return (
@@ -41,6 +43,12 @@ export function MenuRecipesPage() {
                   {money(f.price)} <span>/ porsi</span>
                 </p>
                 <button
+                  disabled={!isAdmin}
+                  title={
+                    isAdmin
+                      ? "Edit menu dan resep"
+                      : "Hanya pemilik/admin dapat mengubah menu"
+                  }
                   className="button white full menu-edit-button"
                   onClick={() => {
                     setSelected(f);

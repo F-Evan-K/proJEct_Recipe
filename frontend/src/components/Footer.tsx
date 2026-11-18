@@ -6,7 +6,7 @@ export function Footer() {
         <Leaf size={13} /> A little less waste. A little more care.
       </span>
       <span>
-        KitchenFlow AI <i>·</i> Culina Labs <i>·</i> Frontend demo
+        KitchenFlow AI <i>·</i> by proJEct_Recipe <i>·</i> Frontend demo
       </span>
     </footer>
   );

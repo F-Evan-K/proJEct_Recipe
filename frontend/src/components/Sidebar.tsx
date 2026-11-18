@@ -1,3 +1,5 @@
+import { useAuth } from "../auth/AuthContext";
+import { Users, LogOut } from "lucide-react";
 import {
   LayoutDashboard,
   Package,
@@ -19,8 +21,10 @@ const icons = [
   ChartNoAxesCombined,
   ClipboardList,
   Leaf,
+  Users,
 ];
 export function Sidebar() {
+  const { user, isAdmin, logout, busy, error } = useAuth();
   const { page, mobile, go, notify } = useWorkspace();
   return (
     <aside className={mobile ? "sidebar open" : "sidebar"}>
@@ -29,7 +33,7 @@ export function Sidebar() {
           <ChefHat size={25} />
         </span>
         <div>
-          kitchenflow<span>BY CULINA LABS</span>
+          kitchenflow<span>by proJEct_Recipe</span>
         </div>
       </a>
       <button
@@ -46,20 +50,22 @@ export function Sidebar() {
       </button>
       <div className="nav-label">WORKSPACE</div>
       <nav>
-        {pages.map((p, i) => {
-          const Icon = icons[i];
-          return (
-            <button
-              key={p}
-              className={p === page ? "active" : ""}
-              onClick={() => go(p)}
-            >
-              <Icon size={19} />
-              {p}
-              {p === "AI Forecasting" && <span className="tiny">AI</span>}
-            </button>
-          );
-        })}
+        {pages
+          .filter((p) => p !== "Kelola Akun" || isAdmin)
+          .map((p, i) => {
+            const Icon = icons[i];
+            return (
+              <button
+                key={p}
+                className={p === page ? "active" : ""}
+                onClick={() => go(p)}
+              >
+                <Icon size={19} />
+                {p}
+                {p === "AI Forecasting" && <span className="tiny">AI</span>}
+              </button>
+            );
+          })}
       </nav>
       <div className="side-bottom">
         <div className="side-promo">
@@ -82,12 +88,25 @@ export function Sidebar() {
         >
           <CircleHelp size={18} /> Pusat bantuan <ArrowUpRight size={14} />
         </button>
+        {error && (
+          <p className="editor-error" role="alert">
+            {error}
+          </p>
+        )}
         <div className="profile">
-          <div className="avatar">CL</div>
+          <div className="avatar">{user?.name.slice(0, 2).toUpperCase()}</div>
           <div>
-            Culina Labs<small>Workspace admin</small>
+            {user?.name}
+            <small>{isAdmin ? "Pemilik / Admin" : "Staf"}</small>
           </div>
-          <span className="online" />
+          <button
+            className="icon-btn"
+            aria-label="Keluar akun"
+            disabled={busy}
+            onClick={() => void logout()}
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

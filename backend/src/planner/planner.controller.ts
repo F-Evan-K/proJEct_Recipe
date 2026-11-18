@@ -1,3 +1,4 @@
+import { AdminOnly } from "../auth/auth.guard";
 import {
   Body,
   Controller,
@@ -72,7 +73,9 @@ export class PlannerController {
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
   }
-  @Post(":id/approve") approve(@Param("id", ParseIntPipe) id: number) {
+  @AdminOnly() @Post(":id/approve") approve(
+    @Param("id", ParseIntPipe) id: number,
+  ) {
     return this.db.$transaction(async (tx) => {
       const plan = await tx.kitchenPlan.findUnique({ where: { id } });
       if (!plan) throw new NotFoundException("Plan not found");

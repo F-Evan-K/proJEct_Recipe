@@ -1,7 +1,9 @@
+import { useAuth } from "../auth/AuthContext";
 import { Package, ClipboardList, Leaf, Search, Plus } from "lucide-react";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { Metric } from "../components/Metric";
 export function InventoryPage() {
+  const { isAdmin } = useAuth();
   const { stock, search, setSearch, setModal } = useWorkspace();
   return (
     <>
@@ -84,6 +86,8 @@ export function InventoryPage() {
                     </td>
                     <td>
                       <button
+                        disabled={!isAdmin}
+                        title={isAdmin ? "Tambah stok" : "Hanya pemilik/admin"}
                         className="text-btn"
                         onClick={() => setModal("stock")}
                       >

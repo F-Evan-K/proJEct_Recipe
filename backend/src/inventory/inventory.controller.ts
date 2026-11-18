@@ -1,3 +1,4 @@
+import { AdminOnly } from "../auth/auth.guard";
 import {
   Body,
   Controller,
@@ -26,7 +27,7 @@ export class InventoryController {
       include: { ingredient: true },
     });
   }
-  @Post("stock-movements") movement(@Body() dto: MovementDto) {
+  @AdminOnly() @Post("stock-movements") movement(@Body() dto: MovementDto) {
     if (dto.quantity === 0)
       throw new BadRequestException("Movement quantity cannot be zero");
     return this.db.$transaction(

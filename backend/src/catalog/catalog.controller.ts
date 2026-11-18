@@ -1,3 +1,4 @@
+import { AdminOnly } from "../auth/auth.guard";
 import {
   Body,
   Controller,
@@ -20,12 +21,12 @@ export class CatalogController {
   @Get("ingredients") ingredients() {
     return this.db.ingredient.findMany({ orderBy: { id: "asc" } });
   }
-  @Post("ingredients") ingredient(@Body() dto: IngredientDto) {
+  @AdminOnly() @Post("ingredients") ingredient(@Body() dto: IngredientDto) {
     return this.db.ingredient.create({
       data: { ...dto, name: dto.name.trim(), category: dto.category.trim() },
     });
   }
-  @Put("ingredients/:id") updateIngredient(
+  @AdminOnly() @Put("ingredients/:id") updateIngredient(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: IngredientDto,
   ) {
@@ -61,12 +62,12 @@ export class CatalogController {
     if (!menu) throw new NotFoundException("Menu not found");
     return menu;
   }
-  @Post("menus") createMenu(@Body() dto: MenuDto) {
+  @AdminOnly() @Post("menus") createMenu(@Body() dto: MenuDto) {
     return this.db.menuItem.create({
       data: { ...dto, name: dto.name.trim(), category: dto.category.trim() },
     });
   }
-  @Put("menus/:id") updateMenu(
+  @AdminOnly() @Put("menus/:id") updateMenu(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: MenuDto,
   ) {
@@ -75,7 +76,7 @@ export class CatalogController {
       data: { ...dto, name: dto.name.trim(), category: dto.category.trim() },
     });
   }
-  @Put("menus/:id/details") saveDetails(
+  @AdminOnly() @Put("menus/:id/details") saveDetails(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: MenuDetailsDto,
   ) {
@@ -112,10 +113,12 @@ export class CatalogController {
       });
     });
   }
-  @Delete("menus/:id") archive(@Param("id", ParseIntPipe) id: number) {
+  @AdminOnly() @Delete("menus/:id") archive(
+    @Param("id", ParseIntPipe) id: number,
+  ) {
     return this.db.menuItem.update({ where: { id }, data: { active: false } });
   }
-  @Put("menus/:id/recipe") replaceRecipe(
+  @AdminOnly() @Put("menus/:id/recipe") replaceRecipe(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: RecipeDto,
   ) {
